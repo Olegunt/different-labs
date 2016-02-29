@@ -1,0 +1,138 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+class Magic
+{
+    private:
+	  unsigned** tab;
+	  int str;
+	  int col;
+	  int degree;
+	public:
+	  Magic(int);
+	  ~Magic();
+	  void display();
+	  void input();
+	  void multiply();
+	  Magic turn_90();
+	  void increment();
+	  void add(Magic);
+};
+
+Magic::Magic(int n) 
+{
+  degree = n; 
+  tab = new unsigned* [degree];
+  for(str=0; str < degree; str++)
+    tab[str] = new unsigned [degree];
+  for(str=0; str < degree; str++)
+    for(col=0; col < degree; col++)
+      tab[str][col] = 0; 
+} 
+
+Magic::~Magic() 
+{
+  for(str=0; str < degree; str++)
+    delete [] tab[str]; 
+  delete [] tab; 
+} 
+
+void Magic::display() 
+{
+  int degree2;   
+  int len = 0;   
+  degree2 = (degree * degree);
+  while(degree2 > 0) 
+  {
+    degree2 /= 10;
+    len++;
+  } 
+  for(str=0; str < degree; str++) 
+  {
+    for(col=0; col < degree; col++)
+      printf("%0*d  ", len, tab[str][col]); 
+    putchar('\n');
+  } 
+  putchar('\n');
+} 
+
+void Magic::input()
+{
+  int M = (degree - 1)/2;
+  int m = 0;
+  for(col = 0,str = (degree - 1);col < M;++col)
+  {
+    tab[str][col] = m;
+    ++m;  
+  }
+  for(++m;col < (degree - 1);m++,col++)
+    tab[str][col] = m;
+  tab[str][col] = M;
+  
+  for(str = (degree - 2);str > -1;--str)
+  {
+    for(col = 0;col < (degree - 1);col++)
+      tab[str][col] = tab[str + 1][col + 1];
+    tab[str][col] = tab[str + 1][0];
+  }
+}
+
+Magic Magic::turn_90()
+{
+  Magic sq(degree);
+  for(str = 0;str < degree;str++)
+    for(int k = 0,col = 0;col < degree;col++)
+    {
+      sq.tab[k][(degree -1 )-str] = tab[str][col];
+      ++k;
+    }
+  return sq;
+}
+
+void Magic::increment()
+{
+  for(str=0; str < degree; str++)
+    for(col=0; col < degree; col++)
+      ++tab[str][col]; 
+}
+
+void Magic::multiply()
+{
+	for(str=0; str < degree; str++)
+    for(col=0; col < degree; col++)
+      tab[str][col] *= degree; 
+}
+
+void Magic::add(Magic squ)
+{
+  unsigned** p = squ.tab;
+  for(str = 0;str < degree;str++)
+    for(col = 0;col < degree;col++)
+      tab[str][col] = tab[str][col] + p[str][col];
+}
+
+int main(int argc,char* argv[])
+{
+  if(argc != 2)
+    return(puts("Usage: magic degree"));
+  int n = atoi(argv[1]);
+  if((n % 2) == 0)
+  {
+    puts("Usage: magic 5 (or 7, 11, 17, 19, 23, ...)");
+    return(n);
+  }
+  Magic square1(n);
+  Magic square2(n);
+  
+  square1.input();  square2.input();
+  
+  square1.multiply();
+  square2 = square2.turn_90();
+  square2.increment();
+  
+  Magic square3(n);
+  square1.add(square2);
+  
+  square1.display();
+  return(n);
+}
