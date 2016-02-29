@@ -3,7 +3,7 @@
 
 class Magic
 {
-    private:
+  private:
 	  unsigned** tab;
 	  int str;
 	  int col;
@@ -16,7 +16,7 @@ class Magic
 	  void multiply();
 	  Magic turn_90();
 	  void increment();
-	  void add(Magic);
+	  Magic add(Magic);
 };
 
 Magic::Magic(int n) 
@@ -103,12 +103,14 @@ void Magic::multiply()
       tab[str][col] *= degree; 
 }
 
-void Magic::add(Magic squ)
+Magic Magic::add(Magic squ)
 {
+  Magic vr(degree);
   unsigned** p = squ.tab;
   for(str = 0;str < degree;str++)
     for(col = 0;col < degree;col++)
-      tab[str][col] = tab[str][col] + p[str][col];
+      vr.tab[str][col] = tab[str][col] + p[str][col];
+  return vr;
 }
 
 int main(int argc,char* argv[])
@@ -124,15 +126,16 @@ int main(int argc,char* argv[])
   Magic square1(n);
   Magic square2(n);
   
-  square1.input();  square2.input();
+  square1.input(); square2.input();
   
   square1.multiply();
-  square2 = square2.turn_90();
-  square2.increment();
+
+  Magic square3 = square2.turn_90();
+
+  square3.increment();
   
-  Magic square3(n);
-  square1.add(square2);
-  
-  square1.display();
+  Magic square4 = square1.add(square3);
+
+  square4.display();
   return(n);
 }
