@@ -1,0 +1,93 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <iostream>
+
+using namespace std;
+
+int euclide(int,int);
+
+class Fraction 
+{
+  private:
+    int nom; 
+    int den; 
+  public:
+    Fraction(char*);
+    Fraction(int n=0, int m=1) : nom(n), den(m) {};
+	  int operator!=(Fraction);
+    operator char*();
+    void reduce();
+};
+
+Fraction::Fraction(char* s) 
+{
+  char* p = strchr(s, '/'); 
+  den = 1; 
+  if(p != NULL) 
+  {
+    *p++ = '\0'; 
+    den = atoi(p);
+  }
+  nom = atoi(s); 
+}
+
+int Fraction::operator!=(Fraction y)
+{
+	int sign;
+	return ((nom*y.den)!=(y.nom*den))?sign = 1:sign = 0;
+}
+
+Fraction::operator char* () 
+{
+  static char s[32]; 
+  sprintf(s, "%d/%d", nom, den);
+  return s;
+} 
+
+void Fraction::reduce() 
+{
+  int nod;
+  nod = euclide(abs(nom), den);
+  nom /= nod; 
+  den /= nod; 
+  return; 
+}
+
+int euclide(int n, int m) 
+{
+  int r = 1; 
+  while(n != 0) 
+  {
+    r = m % n; 
+    m = n; 
+    n = r; 
+  } 
+  return(m); 
+} 
+
+int main(int argc, char* argv[]) 
+{
+  if(argc < 3) 
+   return(puts("Usage: complement nomerator/denomerator"));
+  
+  char str1[2],str2[2];
+  strcpy(str1,argv[1]);
+  strcpy(str2,argv[2]);
+  
+  Fraction x(argv[1]); 
+  Fraction y(argv[2]);
+  
+  x.reduce();  y.reduce();
+  int c = x!=y;
+  cout << (char*)y << endl;
+  switch(c){
+    case 1 : cout << str1 << "!=";
+             cout << str2 << endl;
+             break;
+    case 0 : cout << str1 << "=";
+             cout << str2 << endl;
+             break;
+  }
+  return(0); 
+}
