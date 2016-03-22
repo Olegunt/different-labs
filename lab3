@@ -18,6 +18,7 @@ class Fraction
 	  int operator!=(Fraction);
     operator char*();
     void reduce();
+    int getden(){return den;}
 };
 
 Fraction::Fraction(char* s) 
@@ -71,22 +72,23 @@ int main(int argc, char* argv[])
   if(argc < 3) 
    return(puts("Usage: complement nomerator/denomerator"));
   
-  char str1[2],str2[2];
-  strcpy(str1,argv[1]);
-  strcpy(str2,argv[2]);
-  
   Fraction x(argv[1]); 
   Fraction y(argv[2]);
+
+  if(x.getden() * y.getden() == 0)
+    return(puts("Divide on zero"));
   
-  x.reduce();  y.reduce();
-  int c = x!=y;
-  cout << (char*)y << endl;
+  Fraction x1(x); 
+  Fraction y1(y);
+  
+  x1.reduce();  y1.reduce();
+  int c = x1!=y1;
   switch(c){
-    case 1 : cout << str1 << "!=";
-             cout << str2 << endl;
+    case 1 : cout << (char*)x << "!=";
+             cout << (char*)y << endl;
              break;
-    case 0 : cout << str1 << "=";
-             cout << str2 << endl;
+    case 0 : cout << (char*)x << "=";
+             cout << (char*)y << endl;
              break;
   }
   return(0); 
