@@ -1,0 +1,108 @@
+#include <stdio.h>
+#include <time.h>
+#define NUM 5
+
+struct train{
+	char name[50];
+	int  num;
+	int  dur;
+	int  hour;
+	int  min;
+};
+
+void out(struct train* t)
+{
+	int i;
+    printf("\n--------Расписание поездов-------\n");
+	for(i=0;i<NUM;i++)
+    	printf("%-15s %6d %3d %3d:%-3d\n",t[i].name,t[i].num,t[i].dur,t[i].hour,t[i].min);
+}
+
+void clear()
+{
+      while(getchar() != '\n')
+        ;   
+}
+
+void arival1(struct train* t,int n)
+{
+    int i;
+    time_t rawtime,t1;
+    struct tm* timeinfo;
+    for(i=0;i<NUM;i++)
+      if(t[i].num == n)
+      {
+        time(&rawtime);
+        timeinfo = localtime(&rawtime);
+        timeinfo->tm_hour = t[i].hour;
+        timeinfo->tm_min = t[i].min;
+        timeinfo->tm_sec = 0;
+        t1 = mktime(timeinfo);
+        rawtime = (t[i].dur*3600) + t1;
+        printf("\nПРИБЫТИЕ ПОЕЗДА %d:%s",n,ctime(&rawtime));
+      }
+}
+
+void arival2(struct train* p,int n,int d,int m,int y) 
+{
+    int i;
+    time_t rawtime,t1;
+    struct tm* timeinfo;
+    for(i=0;i<NUM;i++)
+      if(p[i].num == n)
+      {
+        time(&rawtime);
+        timeinfo = localtime(&rawtime);
+        timeinfo->tm_hour = p[i].hour;
+        timeinfo->tm_min = p[i].min;
+        timeinfo->tm_sec = 0;
+        timeinfo->tm_mday = d;
+        timeinfo->tm_mon = m-1;
+        timeinfo->tm_year = y-1900;
+        t1 = mktime(timeinfo);
+        rawtime = (p[i].dur*3600) + t1;
+        printf("\nПРИБЫТИЕ ПОЕЗДА %d:%s",n,ctime(&rawtime));
+      }
+}
+
+int main()
+{
+    int i;
+	FILE* fp;
+	if((fp = fopen("trains","r")) == NULL)
+		printf("Error\n");
+
+    struct train tr[NUM];
+    for(i=0;i<NUM;i++)
+    	fscanf(fp,"%s %d %d %d:%d",tr[i].name,&tr[i].num,&tr[i].dur,&tr[i].hour,&tr[i].min);
+
+    fclose(fp);
+    
+    out(tr);
+
+    printf("\nВведите любой символ для введения запроса или EOF для завершения...\n");
+    while(getchar()!=EOF)
+    {
+        printf("Введите запрос:\n");
+        int num,day,mon,year,k;
+        k = scanf("%d %d%*c%d%*c%d\n",&num,&day,&mon,&year);
+ 
+        switch(k)
+        {
+          case 0 :
+                printf("Неправильный формат\n");
+                clear();
+                break;
+          case EOF :
+                out(tr);
+                break;
+          case 1 :
+                arival1(tr,num);
+                break;
+          case 4 :
+                arival2(tr,num,day,mon,year);
+                break;
+        }
+        printf("\nВведите любой символ для продолжения или EOF для завершения...\n");
+    }
+}
