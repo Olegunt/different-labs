@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <time.h>
+#include <stdlib.h>
 #define NUM 5
 
 struct train{
@@ -12,17 +13,17 @@ struct train{
 
 void out(struct train* t)
 {
-    int i;
+	int i;
     printf("\n--------Расписание поездов-------\n");
-    for(i=0;i<NUM;i++)
+	for(i=0;i<NUM;i++)
     	printf("%-15s %6d %3d %3d:%-3d\n",t[i].name,t[i].num,t[i].dur,t[i].hour,t[i].min);
     printf("---------------------------------");
 }
 
-void clear()
+void clear(char* s,int n)
 {
-      while(getchar() != '\n')
-        ;   
+    for(n=0;n<15;n++)
+      s[n] = '\0';  
 }
 
 void arival1(struct train* t,int n)
@@ -68,11 +69,11 @@ void arival2(struct train* p,int n,int d,int m,int y)
 
 int main()
 {
-    int i;
+    int i,m;
 	FILE* fp;
 	if((fp = fopen("trains","r")) == NULL)
     {
-	printf("Error\n");
+		printf("Error\n");
         exit(1);
     }
 
@@ -84,26 +85,27 @@ int main()
     
     out(tr);
     
+    char str[20];
     int num,day,mon,year,k;
-    printf("\nВведите запрос:\n");
-    k = scanf("%d %d%*c%d%*c%d",&num,&day,&mon,&year);
-    while(k!=EOF)
+    do
     {
-        switch(k)
-        {
-          case 0 :
-                out(tr);
-                clear();
-                break;
-          case 1 :
-                arival1(tr,num);
-                clear();
-                break;
-          case 4 :
-                arival2(tr,num,day,mon,year);
-                break;
-        }
         printf("\nВведите запрос:\n");
-        k = scanf("%d %d%*c%d%*c%d",&num,&day,&mon,&year);
-    }
+        clear(str,20);
+        fgets(str,20,stdin);
+        if(str[0] == '\n')
+            out(tr);
+        else
+        {
+            k = sscanf(str,"%d %d%*c%d%*c%d",&num,&day,&mon,&year);
+            switch(k)
+            {
+                case 1 :
+                    arival1(tr,num);
+                    break;
+                case 4 :
+                    arival2(tr,num,day,mon,year);
+                    break;
+            }
+        }
+    }while(k!=EOF);
 }
