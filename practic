@@ -12,10 +12,11 @@ struct train{
 
 void out(struct train* t)
 {
-	int i;
+    int i;
     printf("\n--------Расписание поездов-------\n");
-	for(i=0;i<NUM;i++)
+    for(i=0;i<NUM;i++)
     	printf("%-15s %6d %3d %3d:%-3d\n",t[i].name,t[i].num,t[i].dur,t[i].hour,t[i].min);
+    printf("---------------------------------");
 }
 
 void clear()
@@ -70,7 +71,10 @@ int main()
     int i;
 	FILE* fp;
 	if((fp = fopen("trains","r")) == NULL)
-		printf("Error\n");
+    {
+	printf("Error\n");
+        exit(1);
+    }
 
     struct train tr[NUM];
     for(i=0;i<NUM;i++)
@@ -79,30 +83,27 @@ int main()
     fclose(fp);
     
     out(tr);
-
-    printf("\nВведите любой символ для введения запроса или EOF для завершения...\n");
-    while(getchar()!=EOF)
+    
+    int num,day,mon,year,k;
+    printf("\nВведите запрос:\n");
+    k = scanf("%d %d%*c%d%*c%d",&num,&day,&mon,&year);
+    while(k!=EOF)
     {
-        printf("Введите запрос:\n");
-        int num,day,mon,year,k;
-        k = scanf("%d %d%*c%d%*c%d\n",&num,&day,&mon,&year);
- 
         switch(k)
         {
           case 0 :
-                printf("Неправильный формат\n");
-                clear();
-                break;
-          case EOF :
                 out(tr);
+                clear();
                 break;
           case 1 :
                 arival1(tr,num);
+                clear();
                 break;
           case 4 :
                 arival2(tr,num,day,mon,year);
                 break;
         }
-        printf("\nВведите любой символ для продолжения или EOF для завершения...\n");
+        printf("\nВведите запрос:\n");
+        k = scanf("%d %d%*c%d%*c%d",&num,&day,&mon,&year);
     }
 }
