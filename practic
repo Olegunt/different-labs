@@ -22,8 +22,9 @@ void out(struct train* t)
 
 void clear(char* s,int n)
 {
-    for(n=0;n<15;n++)
-      s[n] = '\0';  
+    int m;
+    for(m=0;m<n;m++)
+      s[m] = '\0';  
 }
 
 void arival1(struct train* t,int n)
