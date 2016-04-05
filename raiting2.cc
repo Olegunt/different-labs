@@ -44,7 +44,8 @@ Alpha::operator char*()
   static  char s[32]; 
   unsigned  b=bin; 
   int i=0; 
-  int j=0; 
+  int j=0;
+  bzero(s,32);
   while(b>0)
   { 
     if(b & 1) 
