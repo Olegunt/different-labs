@@ -1,0 +1,111 @@
+#include <stdlib.h>
+#include <iostream>
+
+using namespace std;                                                                                                
+                                         
+class Heap {
+  private:
+    int size;                         
+  public:
+    Heap(int s) : size(s) {};                                       
+                                                                             
+    int get(int n = 0) { size -= n; return(size); };
+};        
+                                         
+class Gambler {
+  protected:
+    Heap* heap;                       
+    const int limit;                                             
+    const char* name;
+    static int step_man;                       
+  public:
+    Gambler(Heap& h, int l) : limit(l) { heap = &h; };                                           
+    virtual int move() = 0;                                                               
+    int query();                         
+};           
+
+int Gambler::step_man = 0;
+                              
+class Man : public Gambler {
+  public:
+    Man(Heap& h, int l, const char* n) : Gambler(h, l) { name = n; };
+    virtual int move();                           
+};       
+                                
+class Pen : public Gambler {
+  public:
+    Pen(Heap& h, int l, const char* n) : Gambler(h, l) { name = n; };
+    virtual int move();                             
+};       
+                                     
+int Gambler::query()
+{
+  cout << "Heap = " << heap->get() << " " << name << " > ";
+  return(heap->get());                                          
+}           
+                                       
+int Man::move() {
+int g;                                                                  
+cin >> g;    
+
+if((heap->get()<limit)&&((g > heap->get()) || (g<1)))
+{
+  g = 0;
+  while(heap->get(1)!=0)
+    ;
+  return(0);
+}                                                         
+                                                                
+if((g < 1) || (g > (heap->get())) || (g > limit))
+  g = limit;
+
+step_man = g;
+
+return(heap->get(g));
+}               
+                                           
+int Pen::move() {
+int rest = 0;                           
+int x = 0;                                 
+int h;                                        
+if((h = heap->get()) == 1)
+{
+  cout << h << "\n";
+  return(heap->get(1));
+}
+                                                              
+while((rest = (x *limit + x + 1)) < h)
+  x ++;
+if(rest > h)
+  rest = (x - 1)*limit + x;
+
+if(rest == h)
+  rest = h - step_man;
+
+heap->get(h - rest);                                               
+cout << h - rest << "\n";                                         
+return(heap->get());                                                           
+}               
+                                  
+int main(int argc, char* argv[]) 
+{
+  int i = 0;                             
+  Heap h(atoi(argv[1]));                                 
+                                                                  
+  Gambler* g[] = { new Man(h, atoi(argv[2]), "Man"),
+                   new Pen(h, atoi(argv[2]), "Pen")
+                 };
+                                             
+  while(g[i]->query() != 0) 
+  {
+    g[i]->move();
+    if(++i > 1)
+      i = 0;
+  }
+                                                  
+  cout << "Winner\n";
+                                                       
+  delete g[0];
+  delete g[1];
+  return(0);                                                                
+}          
