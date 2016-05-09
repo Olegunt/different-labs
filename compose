@@ -1,0 +1,73 @@
+#include <iostream>
+#include <cmath>
+
+using namespace std;
+
+class Triangle;
+
+class Dot
+{
+private:
+	float x;
+	float y;
+friend class Triangle;
+friend istream& operator >> (istream&,Dot&);
+public:
+	Dot(float xx = 0.0,float yy = 0.0):x(xx),y(yy){}
+	float getx() {return x;}
+	float gety() {return y;}
+};
+
+class Triangle
+{
+private:
+	Dot p1;
+	Dot p2;
+	Dot p3;
+public:
+	Triangle(Dot& P,Dot& Q,Dot& J):p1(P),p2(Q),p3(J){}
+	Triangle(float x1,float y1,float x2,float y2,float x3,float y3):p1(x1,y1),p2(x2,y2),p3(x3,y3){}
+	static float sides(Dot&, Dot&);
+	float square(float,float,float);
+};
+
+float Triangle::sides(Dot& a, Dot& b) 
+{
+	return sqrt(pow((a.x - b.x),2) + pow((a.y - b.y),2));
+}
+
+float Triangle::square(float a,float b,float c)
+{
+	float p,s;
+  p = (a + b + c)/2;
+  s = sqrt(p*(p - a)*(p - b)*(p - c));
+  return s;
+}
+
+istream& operator >> (istream& in,Dot& p)
+{
+	char semicolon;
+	in >> p.x >> semicolon >> p.y;
+	return in;
+}
+
+int main()
+{
+	Dot A,B,C;
+	float sqr,s1,s2,s3;
+	cout << "Введите х1;y1 x2;y2 x3;y3" << endl;
+	while(cin >> A >> B >> C)
+	{
+    s1 = Triangle::sides(A,B);
+		s2 = Triangle::sides(B,C);
+		s3 = Triangle::sides(A,C);
+	  if((s1 >= s2+s3)||(s2 >= s1+s3)||(s3 >= s1+s2))
+	    cout << "Неверные координаты вершин" << endl;
+	  else
+	  {
+		  Triangle D(A,B,C);
+		  sqr = D.square(s1/2,s2/2,s3/2);                               //вычисляет площадь вписанного треугольника
+      cout << "Площадь равна " << sqr << endl;
+    }  
+	}
+}
