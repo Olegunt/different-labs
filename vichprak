@@ -1,94 +1,101 @@
-#include "stdafx.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#define h 0.001
-#define n 3
-FILE *fw;
-double X0[n + 1], X[n + 1];
-static double AD[n + 1][n + 1];
+#define h 0.0001
+double AD[4][4];
+FILE *fp;
 
-void Vector(double Z[], double t)
+void DisplayVector(char s,double* vector)
 {
-	int i;
-	for (i = 1; i < n + 1; i++)
-		Z[i] = exp(AD[i][i] * t);
-}
-
-void PrintVector(char* c, double* Y)
-{
-	int i;
-	printf("vector %s:\n", c);
-	fprintf(fw, "vector %s:\n", c);
-	for (i = 1; i <= n; i++)
+    int k;
+	for (k = 1; k < 4; k++)
 	{
-		printf("%s[%d]=%32.16f\n", c, i, Y[i]);
-		fprintf(fw, "%s[%d]=%32.16f\n", c, i, Y[i]);
+		printf("%c[%d]=%32.16f\n", s, k, vector[k]);
+		fprintf(fp, "%c[%d]=%32.16f\n", s, k, vector[k]);
 	}
 }
 
-void YMT(double AD[n + 1][n + 1])
+void CalcVector(double* Ar,double n)
 {
-	double X1[n + 1];
-	int i;
-	for (i = 1; i < n + 1; i++)
-	{
-		X1[i] = X0[i] + h*AD[i][i] * X0[i];
-		X[i] = X0[i] + (h / 2)*AD[i][i] * (X0[i] + X1[i]);
-	}
-	PrintVector("X", X);
+	int m;
+	for(m = 1;m < 4;m++)
+    	Ar[m] = exp(AD[m][m] * n);
 }
 
-double Pogr(double Z, int i)
+void Pogr(double* A,double* C)
 {
-	double eps;
-	eps = fabs((X[i] - Z) / Z);
-	return eps;
-}
-
-int CompPogr(double Y, int k)
-{
-	int i = 0, state = 0, y_i, z_i;
-	double y, z;
-	y = Y;
-	z = X[k];
-	y_i = (int)y;
-	z_i = (int)z;
-	while (y_i == z_i)
+	double eps,eps1;
+	int eps_i,j,k;
+	for(k = 1;k<4;k++)
 	{
-		if (y_i && z_i && !state)
-			state = 1;
-		if ((y_i == z_i) && (y_i || (!y_i && state == 1)))
-			i++;
-		y = y * 10 - y_i * 10;
-		z = z * 10 - z_i * 10;
-		y_i = (int)y;
-		z_i = (int)z;
-	}
-	return i;
+		j = 0;
+		eps = fabs((C[k]-A[k])/A[k]);
+		eps1 = eps;
+		eps_i = (int)eps1;
+		do
+		{
+			eps1 = eps1*10 - eps_i*10;
+			eps_i = (int)eps1;
+			if(eps_i == 0)
+				j++;
+		}while(eps_i==0);
+		printf("X[%d]:\neps=%32.16f\nepsComp=%11d\n",k,eps,j);
+		fprintf(fp, "X[%d]:\neps=%32.16f\nepsComp=%11d\n",k,eps,j);
+    }
 }
 
 int main()
 {
-	double X_a[n + 1], t = h;
-	int i;
-	fw = fopen("results.txt", "wt");
-	AD[1][1] = -(pow(10, 5));
-	AD[2][2] = -(pow(10, 2));
-	AD[3][3] = -(pow(10, 0));
-	Vector(X0, 0.0);
-	PrintVector("X0", X0);
-	YMT(AD);
-	Vector(X_a, t);
-	printf("analitic value of X:\n");
-	fprintf(fw,"analitic value of X:\n");
-	PrintVector("X", X_a);
-	for (i = 1; i <= n; i++)
+	double X0[4],X1h[4],X[4],X_a[4];
+    int i,k,m;
+
+    fp = fopen("result.txt","w");     
+
+    //Заполняем матрицу AD в соотв. с условием
+    AD[1][1] = -100;
+    AD[2][2] = -10;
+    AD[3][3] = -1;
+    for(i = 1;i < 4;i++)
+    {
+    	if(i == 1)
+    		for(k=2;k<4;k++)
+    			AD[i][k] = 0;
+    	if(i == 2)
+    		for(k=1;k<4;k+=2)
+    			AD[i][k] = 0;
+    	if(i == 3)
+    		for(k=1;k<3;k+=1)
+    			AD[i][k] = 0;
+    }
+
+    //Вычисляем вектор Х0 как Х(t) при t = 0
+    CalcVector(X0,0);
+
+    //Применяем метод явных трапеций для вычисления численного значения в-ра Х (BD = 0)
+    for (i = 1; i < 4; i++)
 	{
-		printf("X[%d]:\neps=%32.16f\nepsComp=%11d\n", i, Pogr(X_a[i], i),CompPogr(X_a[i], i));
-		fprintf(fw,"X[%d]:\neps=%32.16f\nepsComp=%11d\n", i, Pogr(X_a[i], i), CompPogr(X_a[i], i));
+		X1h[i] = X0[i] + h*AD[i][i] * X0[i];                //1-ый этап интегрирования
+		X[i] = X0[i] + (h / 2)*AD[i][i] * (X0[i] + X1h[i]); //2-ой этап интегрирования
 	}
-	fclose(fw);
-    return 0;
+
+    //Выводим численное значение вектора Х на терминал и в файл результатов
+    printf("numerical value of vector X:\n");
+	fprintf(fp,"numerical value of vector X:\n");
+    DisplayVector('X',X);
+
+	//Вычисляем значение вектора Х с помощью данного аналитического решения
+    CalcVector(X_a,h);
+
+    //Выводим аналитическое значение вектора X на терминал и в файл результатов
+    printf("analitic value of vector X:\n");
+	fprintf(fp,"analitic value of vector X:\n");
+    DisplayVector('X',X_a);
+  
+    //Cчитаем и выводим погрешности
+    printf("error\n");
+    fprintf(fp,"error\n");
+    Pogr(X_a,X);
+
+    fclose(fp);
 }
 
