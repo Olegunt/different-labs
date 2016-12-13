@@ -15,11 +15,11 @@ void DisplayVector(char s,double* vector)
 	}
 }
 
-void CalcVector(double* Ar,double n)
+void CalcVector(double* Ar,double t)
 {
 	int m;
 	for(m = 1;m < 4;m++)
-    	Ar[m] = exp(AD[m][m] * n);
+    	Ar[m] = exp(AD[m][m] * t);
 }
 
 void Pogr(double* A,double* C)
