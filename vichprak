@@ -1,0 +1,94 @@
+#include "stdafx.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#define h 0.001
+#define n 3
+FILE *fw;
+double X0[n + 1], X[n + 1];
+static double AD[n + 1][n + 1];
+
+void Vector(double Z[], double t)
+{
+	int i;
+	for (i = 1; i < n + 1; i++)
+		Z[i] = exp(AD[i][i] * t);
+}
+
+void PrintVector(char* c, double* Y)
+{
+	int i;
+	printf("vector %s:\n", c);
+	fprintf(fw, "vector %s:\n", c);
+	for (i = 1; i <= n; i++)
+	{
+		printf("%s[%d]=%32.16f\n", c, i, Y[i]);
+		fprintf(fw, "%s[%d]=%32.16f\n", c, i, Y[i]);
+	}
+}
+
+void YMT(double AD[n + 1][n + 1])
+{
+	double X1[n + 1];
+	int i;
+	for (i = 1; i < n + 1; i++)
+	{
+		X1[i] = X0[i] + h*AD[i][i] * X0[i];
+		X[i] = X0[i] + (h / 2)*AD[i][i] * (X0[i] + X1[i]);
+	}
+	PrintVector("X", X);
+}
+
+double Pogr(double Z, int i)
+{
+	double eps;
+	eps = fabs((X[i] - Z) / Z);
+	return eps;
+}
+
+int CompPogr(double Y, int k)
+{
+	int i = 0, state = 0, y_i, z_i;
+	double y, z;
+	y = Y;
+	z = X[k];
+	y_i = (int)y;
+	z_i = (int)z;
+	while (y_i == z_i)
+	{
+		if (y_i && z_i && !state)
+			state = 1;
+		if ((y_i == z_i) && (y_i || (!y_i && state == 1)))
+			i++;
+		y = y * 10 - y_i * 10;
+		z = z * 10 - z_i * 10;
+		y_i = (int)y;
+		z_i = (int)z;
+	}
+	return i;
+}
+
+int main()
+{
+	double X_a[n + 1], t = h;
+	int i;
+	fw = fopen("results.txt", "wt");
+	AD[1][1] = -(pow(10, 5));
+	AD[2][2] = -(pow(10, 2));
+	AD[3][3] = -(pow(10, 0));
+	Vector(X0, 0.0);
+	PrintVector("X0", X0);
+	YMT(AD);
+	Vector(X_a, t);
+	printf("analitic value of X:\n");
+	fprintf(fw,"analitic value of X:\n");
+	PrintVector("X", X_a);
+	for (i = 1; i <= n; i++)
+	{
+		printf("X[%d]:\neps=%32.16f\nepsComp=%11d\n", i, Pogr(X_a[i], i),CompPogr(X_a[i], i));
+		fprintf(fw,"X[%d]:\neps=%32.16f\nepsComp=%11d\n", i, Pogr(X_a[i], i), CompPogr(X_a[i], i));
+	}
+	fclose(fw);
+    return 0;
+}
+
